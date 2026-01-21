@@ -4,7 +4,7 @@
 const ONE_BEE = [
   // IMG_6594 - Page 1
   "tag", "send", "deck", "stuck", "snug", "fish", "hold", "mind", "stay", "scrub",
-  "draw", "brown", "cozy", "cosy", "tint", "milk", "yawn", "tank", "want", "crowd",
+  "draw", "brown", "cozy** OR cosy", "tint", "milk", "yawn", "tank", "want", "crowd",
   "pond", "skirt", "sharks", "quilt", "twigs", "taffy", "comfy", "stretch", "tight",
   "candy", "scrunch", "ruby", "close", "tackle", "wire", "skater", "giant", "bucket",
   "chance", "baskets", "tender", "paste", "melon", "farmer", "parent", "tail", "hockey",
@@ -28,8 +28,8 @@ const ONE_BEE = [
 const TWO_BEE = [
   // IMG_6596
   "hesitate", "scorcher", "scavenger", "fragments", "deflated", "unleash", "ration",
-  "cosmetics", "crawdad", "frustration", "unruly", "mascot", "aroma", "moustache",
-  "mustache", "artifacts", "artefacts", "perfume", "sinister", "tuxedo", "discoveries",
+  "cosmetics", "crawdad", "frustration", "unruly", "mascot", "aroma",
+  "moustache** OR mustache", "artifacts** OR artefacts", "perfume", "sinister", "tuxedo", "discoveries",
   "lurches", "language", "prognosis", "Buffalo", "sequins", "gallop", "fabulous",
   "lanky", "fluently", "mysterious", "brandished", "sardines", "anguish", "conical",
   "rickety", "lilt", "pediatric", "porridge", "democracy", "rummage", "beige",
@@ -52,7 +52,7 @@ const THREE_BEE = [
   "tranquilizer", "equestrian", "plaited", "monsieur", "manticores", "prestigious",
   "fraidycat", "guttural", "lo mein", "courier", "sans serif", "psyche", "stucco",
   "Frankenstein", "schema", "et cetera", "vidimus", "delphine", "slough", "archipelago",
-  "serape", "sarape", "puissance", "pinioning", "chignon", "pheromone", "galleon",
+  "serape** OR sarape", "puissance", "pinioning", "chignon", "pheromone", "galleon",
   "magnanimous", "chartreuse", "wainscoting", "Nehru",
   // IMG_6598 - Page 2
   "gangly", "swaggering", "chimneys", "riveted", "plaid", "dirge", "zeal", "whittled",
@@ -79,7 +79,7 @@ const THREE_BEE = [
   "au revoir", "tulle", "boll weevil", "camphor", "Tucson", "paparazzi", "pumpernickel",
   "pogrom", "bursitis", "cycads", "sarsaparilla", "cannelloni", "boulangerie",
   "bronchitis", "Oswego", "diphtheria", "baklava", "corbels", "trebuchets", "Kilimanjaro",
-  "protege", "hors d'oeuvres", "maquisards", "Aubusson", "Charolais", "Charollais"
+  "protege", "hors d'oeuvres", "maquisards", "Aubusson", "Charolais** OR Charollais"
 ];
 
 // Sentences for each word (4th grade appropriate)
@@ -98,7 +98,6 @@ const WORD_SENTENCES = {
   "draw": "I like to draw pictures of animals.",
   "brown": "The dog has brown fur and floppy ears.",
   "cozy": "My bed is cozy and warm on cold nights.",
-  "cosy": "The small cabin felt cosy in winter.",
   "tint": "The sunset gave the sky a pink tint.",
   "milk": "I drink a glass of milk every morning.",
   "yawn": "I had to yawn because I was so sleepy.",
@@ -251,9 +250,7 @@ const WORD_SENTENCES = {
   "mascot": "Our school mascot is a tiger.",
   "aroma": "The aroma of fresh bread filled the kitchen.",
   "moustache": "My grandfather has a gray moustache.",
-  "mustache": "He grew a mustache for the play.",
   "artifacts": "The museum displays ancient artifacts.",
-  "artefacts": "The artefacts from Egypt were fascinating.",
   "perfume": "Mom's perfume smells like roses.",
   "sinister": "The villain had a sinister laugh.",
   "tuxedo": "He wore a tuxedo to the wedding.",
@@ -382,7 +379,6 @@ const WORD_SENTENCES = {
   "slough": "The snake began to slough off its old skin.",
   "archipelago": "Hawaii is an archipelago of islands.",
   "serape": "He wrapped himself in a colorful serape.",
-  "sarape": "The sarape kept him warm on cold nights.",
   "puissance": "The knight displayed great puissance in battle.",
   "pinioning": "The wrestler was pinioning his opponent's arms.",
   "chignon": "She wore her hair in an elegant chignon.",
@@ -538,8 +534,7 @@ const WORD_SENTENCES = {
   "hors d'oeuvres": "We served hors d'oeuvres before dinner.",
   "maquisards": "The maquisards were French resistance fighters.",
   "Aubusson": "The Aubusson tapestry was very valuable.",
-  "Charolais": "The Charolais cattle are white in color.",
-  "Charollais": "The farmer raised Charollais sheep."
+  "Charolais": "The Charolais cattle are white in color."
 };
 
 // Export for use in main app

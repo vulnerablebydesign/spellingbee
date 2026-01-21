@@ -607,6 +607,41 @@
       phase: 'idle' // idle, spoken, revealed
     };
 
+    // Helper functions for variant spellings (e.g., "cozy** OR cosy")
+    // Returns the primary word for speech (without asterisks)
+    function getSpokenWord(entry) {
+      if (entry.includes(' OR ')) {
+        // Get the first word (preferred) and remove asterisks
+        return entry.split(' OR ')[0].replace(/\*+/g, '');
+      }
+      return entry.replace(/\*+/g, '');
+    }
+
+    // Returns formatted display HTML with proper styling
+    function getDisplayWord(entry) {
+      if (entry.includes(' OR ')) {
+        // Format: "cozy** OR cosy" → "cozy**<br><span>OR</span><br>cosy"
+        const parts = entry.split(' OR ');
+        const preferred = parts[0]; // e.g., "cozy**"
+        const alternate = parts[1]; // e.g., "cosy"
+        return `${preferred}<br><span style="font-size: 0.6em; color: #a16207;">OR</span><br>${alternate}`;
+      }
+      return entry;
+    }
+
+    // Returns the key for sentence lookup (preferred word without asterisks)
+    function getSentenceKey(entry) {
+      if (entry.includes(' OR ')) {
+        return entry.split(' OR ')[0].replace(/\*+/g, '');
+      }
+      return entry.replace(/\*+/g, '');
+    }
+
+    // Check if entry is a variant spelling pair
+    function isVariantSpelling(entry) {
+      return entry.includes(' OR ');
+    }
+
     // Audio unlock for iOS
     let audioUnlocked = false;
     document.addEventListener('click', () => {
@@ -731,7 +766,7 @@
     // Reset card state
     function resetCard() {
       card.classList.remove('flipped');
-      wordDisplay.textContent = '';
+      wordDisplay.innerHTML = '';
       nextBtn.classList.remove('hidden');
       listenButtons.classList.add('hidden');
       answerButtons.classList.add('hidden');
@@ -748,7 +783,7 @@
       state.currentWord = state.remainingWords[index];
       state.phase = 'spoken';
 
-      speakWord(state.currentWord);
+      speakWord(getSpokenWord(state.currentWord));
 
       nextBtn.classList.add('hidden');
       listenButtons.classList.remove('hidden');
@@ -757,26 +792,27 @@
     // Repeat word
     repeatBtn.addEventListener('click', () => {
       if (state.currentWord) {
-        speakWord(state.currentWord);
+        speakWord(getSpokenWord(state.currentWord));
       }
     });
 
     // Use in a sentence
     sentenceBtn.addEventListener('click', () => {
       if (state.currentWord) {
-        const sentence = WORD_SENTENCES[state.currentWord];
+        const sentenceKey = getSentenceKey(state.currentWord);
+        const sentence = WORD_SENTENCES[sentenceKey];
         if (sentence) {
           speakText(sentence);
         } else {
           // Fallback if no sentence found
-          speakText(`The word is ${state.currentWord}.`);
+          speakText(`The word is ${sentenceKey}.`);
         }
       }
     });
 
     // Show word
     showBtn.addEventListener('click', () => {
-      wordDisplay.textContent = state.currentWord;
+      wordDisplay.innerHTML = getDisplayWord(state.currentWord);
       card.classList.add('flipped');
       state.phase = 'revealed';
 
