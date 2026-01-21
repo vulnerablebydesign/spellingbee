@@ -246,6 +246,26 @@
       margin-top: 20px;
     }
 
+    .button-row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .action-btn.secondary {
+      background: #6366f1;
+    }
+
+    .action-btn.secondary:hover, .action-btn.secondary:active {
+      background: #4f46e5;
+    }
+
+    .auto-save {
+      font-size: 0.75rem;
+      color: #a16207;
+      margin-top: 8px;
+      opacity: 0.8;
+    }
+
     .answer-btn {
       padding: 18px 35px;
       font-size: 1.2rem;
@@ -414,6 +434,7 @@
         <div class="correct">✓ Correct: <span id="correct-count">0</span></div>
         <div class="incorrect">✗ Incorrect: <span id="incorrect-count">0</span></div>
         <div>📝 Left: <span id="remaining-count">0</span></div>
+        <div class="auto-save">Auto-saved</div>
       </div>
     </div>
 
@@ -430,9 +451,14 @@
       <span>🔊</span> Next Word
     </button>
 
-    <button class="action-btn hidden" id="show-btn">
-      <span>👁️</span> Show Word
-    </button>
+    <div class="button-row hidden" id="listen-buttons">
+      <button class="action-btn secondary" id="repeat-btn">
+        <span>🔊</span> Repeat Word
+      </button>
+      <button class="action-btn" id="show-btn">
+        <span>👁️</span> Show Word
+      </button>
+    </div>
 
     <div class="answer-buttons hidden" id="answer-buttons">
       <button class="answer-btn correct-btn" id="correct-btn">
@@ -499,7 +525,9 @@
     const card = document.getElementById('card');
     const wordDisplay = document.getElementById('word-display');
     const nextBtn = document.getElementById('next-btn');
+    const listenButtons = document.getElementById('listen-buttons');
     const showBtn = document.getElementById('show-btn');
+    const repeatBtn = document.getElementById('repeat-btn');
     const answerButtons = document.getElementById('answer-buttons');
     const correctBtn = document.getElementById('correct-btn');
     const incorrectBtn = document.getElementById('incorrect-btn');
@@ -590,7 +618,7 @@
       card.classList.remove('flipped');
       wordDisplay.textContent = '';
       nextBtn.classList.remove('hidden');
-      showBtn.classList.add('hidden');
+      listenButtons.classList.add('hidden');
       answerButtons.classList.add('hidden');
     }
 
@@ -608,7 +636,14 @@
       speakWord(state.currentWord);
 
       nextBtn.classList.add('hidden');
-      showBtn.classList.remove('hidden');
+      listenButtons.classList.remove('hidden');
+    });
+
+    // Repeat word
+    repeatBtn.addEventListener('click', () => {
+      if (state.currentWord) {
+        speakWord(state.currentWord);
+      }
     });
 
     // Show word
@@ -617,7 +652,7 @@
       card.classList.add('flipped');
       state.phase = 'revealed';
 
-      showBtn.classList.add('hidden');
+      listenButtons.classList.add('hidden');
       answerButtons.classList.remove('hidden');
     });
 
@@ -681,14 +716,46 @@
     function speakWord(word) {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(word);
-      utterance.rate = 0.8;
+      utterance.rate = 0.6;  // Slower for clarity
       utterance.pitch = 1;
 
-      // Try to get a good voice
+      // Try to get the best available voice
       const voices = speechSynthesis.getVoices();
-      const englishVoice = voices.find(v => v.lang.startsWith('en') && v.localService);
-      if (englishVoice) {
-        utterance.voice = englishVoice;
+
+      // Priority order for clearer pronunciation
+      const preferredVoices = [
+        'Samantha',           // iOS high-quality
+        'Karen',              // Australian, very clear
+        'Daniel',             // British, clear
+        'Moira',              // Irish, clear
+        'Google US English',  // Chrome
+        'Google UK English Female',
+        'Microsoft Zira',     // Windows
+        'Alex',               // macOS
+      ];
+
+      let selectedVoice = null;
+
+      // Try preferred voices first
+      for (const name of preferredVoices) {
+        selectedVoice = voices.find(v => v.name.includes(name));
+        if (selectedVoice) break;
+      }
+
+      // Fallback to any local English voice
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v =>
+          v.lang.startsWith('en') && v.localService
+        );
+      }
+
+      // Last resort: any English voice
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v => v.lang.startsWith('en'));
+      }
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
       }
 
       speechSynthesis.speak(utterance);
