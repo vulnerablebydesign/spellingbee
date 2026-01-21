@@ -398,6 +398,91 @@
       background: #e5e7eb;
       color: #78350f;
     }
+
+    /* Speed Control */
+    .speed-control {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 15px 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .speed-control label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #78350f;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .speed-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .speed-label {
+      font-size: 1.2rem;
+    }
+
+    #speed-slider {
+      flex: 1;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(to right, #fde68a, #f59e0b);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    #speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #f59e0b;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #speed-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #f59e0b;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .speed-value {
+      font-size: 0.85rem;
+      color: #a16207;
+      margin-top: 8px;
+    }
+
+    /* Listen Buttons Container */
+    .listen-buttons-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* Sentence Button */
+    .action-btn.sentence-btn {
+      background: #8b5cf6;
+    }
+
+    .action-btn.sentence-btn:hover, .action-btn.sentence-btn:active {
+      background: #7c3aed;
+    }
   </style>
 </head>
 <body>
@@ -406,6 +491,15 @@
     <div class="bee-icon">🐝</div>
     <h1>Spelling Bee</h1>
     <p class="subtitle">2025-2026 Study List</p>
+    <div class="speed-control">
+      <label for="speed-slider">Speech Speed</label>
+      <div class="speed-slider-container">
+        <span class="speed-label">🐢</span>
+        <input type="range" id="speed-slider" min="0.3" max="1.2" step="0.1" value="0.5">
+        <span class="speed-label">🐇</span>
+      </div>
+      <div class="speed-value" id="speed-value">0.5x</div>
+    </div>
     <div class="mode-buttons">
       <button class="mode-btn all-btn" data-mode="all">
         All Words
@@ -451,12 +545,17 @@
       <span>🔊</span> Next Word
     </button>
 
-    <div class="button-row hidden" id="listen-buttons">
-      <button class="action-btn secondary" id="repeat-btn">
-        <span>🔊</span> Repeat Word
-      </button>
-      <button class="action-btn" id="show-btn">
-        <span>👁️</span> Show Word
+    <div class="listen-buttons-container hidden" id="listen-buttons">
+      <div class="button-row">
+        <button class="action-btn secondary" id="repeat-btn">
+          <span>🔊</span> Repeat Word
+        </button>
+        <button class="action-btn" id="show-btn">
+          <span>👁️</span> Show Word
+        </button>
+      </div>
+      <button class="action-btn sentence-btn" id="sentence-btn">
+        <span>📝</span> Use In A Sentence
       </button>
     </div>
 
@@ -518,6 +617,9 @@
       }
     }, { once: true });
 
+    // Speech speed (default slower for 4th graders)
+    let speechSpeed = parseFloat(localStorage.getItem('spellingbee_speed')) || 0.5;
+
     // Elements
     const modeScreen = document.getElementById('mode-screen');
     const gameScreen = document.getElementById('game-screen');
@@ -528,6 +630,7 @@
     const listenButtons = document.getElementById('listen-buttons');
     const showBtn = document.getElementById('show-btn');
     const repeatBtn = document.getElementById('repeat-btn');
+    const sentenceBtn = document.getElementById('sentence-btn');
     const answerButtons = document.getElementById('answer-buttons');
     const correctBtn = document.getElementById('correct-btn');
     const incorrectBtn = document.getElementById('incorrect-btn');
@@ -537,6 +640,18 @@
     const resumeBtn = document.getElementById('resume-btn');
     const newGameBtn = document.getElementById('new-game-btn');
     const playAgainBtn = document.getElementById('play-again-btn');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedValue = document.getElementById('speed-value');
+
+    // Initialize speed slider
+    speedSlider.value = speechSpeed;
+    speedValue.textContent = speechSpeed + 'x';
+
+    speedSlider.addEventListener('input', () => {
+      speechSpeed = parseFloat(speedSlider.value);
+      speedValue.textContent = speechSpeed.toFixed(1) + 'x';
+      localStorage.setItem('spellingbee_speed', speechSpeed);
+    });
 
     // Update word counts on load
     document.getElementById('one-count').textContent = `${WORD_LISTS.one.length} words`;
@@ -646,6 +761,19 @@
       }
     });
 
+    // Use in a sentence
+    sentenceBtn.addEventListener('click', () => {
+      if (state.currentWord) {
+        const sentence = WORD_SENTENCES[state.currentWord];
+        if (sentence) {
+          speakText(sentence);
+        } else {
+          // Fallback if no sentence found
+          speakText(`The word is ${state.currentWord}.`);
+        }
+      }
+    });
+
     // Show word
     showBtn.addEventListener('click', () => {
       wordDisplay.textContent = state.currentWord;
@@ -712,48 +840,42 @@
       showScreen('mode');
     });
 
+    // Get Samantha voice (best for clarity) or fallback
+    function getBestVoice() {
+      const voices = speechSynthesis.getVoices();
+
+      // Try Samantha first (clearest voice)
+      let voice = voices.find(v => v.name === 'Samantha');
+      if (voice) return voice;
+
+      // Fallback to any English voice
+      voice = voices.find(v => v.lang.startsWith('en'));
+      return voice;
+    }
+
     // Speak word
     function speakWord(word) {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(word);
-      utterance.rate = 0.6;  // Slower for clarity
+      utterance.rate = speechSpeed;
       utterance.pitch = 1;
 
-      // Try to get the best available voice
-      const voices = speechSynthesis.getVoices();
-
-      // Priority order for clearer pronunciation
-      const preferredVoices = [
-        'Samantha',           // iOS high-quality
-        'Karen',              // Australian, very clear
-        'Daniel',             // British, clear
-        'Moira',              // Irish, clear
-        'Google US English',  // Chrome
-        'Google UK English Female',
-        'Microsoft Zira',     // Windows
-        'Alex',               // macOS
-      ];
-
-      let selectedVoice = null;
-
-      // Try preferred voices first
-      for (const name of preferredVoices) {
-        selectedVoice = voices.find(v => v.name.includes(name));
-        if (selectedVoice) break;
+      const selectedVoice = getBestVoice();
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
       }
 
-      // Fallback to any local English voice
-      if (!selectedVoice) {
-        selectedVoice = voices.find(v =>
-          v.lang.startsWith('en') && v.localService
-        );
-      }
+      speechSynthesis.speak(utterance);
+    }
 
-      // Last resort: any English voice
-      if (!selectedVoice) {
-        selectedVoice = voices.find(v => v.lang.startsWith('en'));
-      }
+    // Speak text (for sentences)
+    function speakText(text) {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = speechSpeed;
+      utterance.pitch = 1;
 
+      const selectedVoice = getBestVoice();
       if (selectedVoice) {
         utterance.voice = selectedVoice;
       }
@@ -790,7 +912,7 @@
       localStorage.removeItem(key);
     }
 
-    // Load voices
+    // Load voices (some browsers load asynchronously)
     speechSynthesis.onvoiceschanged = () => {
       speechSynthesis.getVoices();
     };
