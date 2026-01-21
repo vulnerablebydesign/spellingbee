@@ -1,0 +1,5 @@
+node_modules/
+*.jpeg
+generate-icons.js
+package.json
+bun.lock
